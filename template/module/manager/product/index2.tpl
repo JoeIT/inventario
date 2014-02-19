@@ -1,0 +1,137 @@
+{literal}
+
+<script type="text/javascript">
+    $(function() {
+        $('a.lightbox').lightBox();
+    });
+function cambiarEstado(codigo)
+{
+	 $.post("index.php", {module:"product",action:"estado",id: ""+codigo+""}, function(data){
+		
+
+					 $('#estado'+codigo).attr('src','template/images/icons2/'+data+'.png');
+					 if (data === "accept")
+					 {
+						 $('#estado'+codigo).attr('title','Publicado');
+					 }
+					 else
+					 {
+						 $('#estado'+codigo).attr('title','NO Publicado');
+					 }
+					 
+				
+			});
+}
+
+
+function deleteDatos(id,accion,info)
+{
+	
+	if (accion == 1)
+	{
+		mensaje = "Seguro de quitar la foto?";
+		jConfirm(mensaje, 'Confirmacion', function(r) {
+		if (r)
+		location = 'index.php?module=product&action=delPhoto&id='+id;	
+		});
+	}
+	else if (accion == 2)
+	{
+		mensaje = "Seguro de quitar el Articulo? \n <b>Info: </b>"+info;
+		jConfirm(mensaje, 'Confirmacion', function(r) {
+		if (r)
+		  $.post("index.php", {module:"product",action:"delItem",id: ""+id+""}, function(data){
+				if(data==1) {							
+					$("#"+id).remove();
+				}
+				else if(data==0) {		
+					alert("No se pudo eliminar los datos");
+				}
+			});	
+		});
+	}
+}
+function ventana(cat)
+{
+	//showPopWin('{/literal}{$module}{literal}&action=view&cat='+cat, 650, 550, null,true,true);
+	location = '{/literal}{$module}{literal}&action=view&cat='+cat;
+}
+function categoria()
+{
+	showPopWin('index.php?module=categoria&action=new', 400, 250, null,true,true);
+}
+
+</script>
+{/literal}
+<center>
+<h2>Administraci&oacute;n de Items</h2>
+
+</center>
+
+
+<form action="{$module}" method="post">
+
+<table  class="search" align='center'  border="0" cellspacing="0" cellpadding="5">
+  <tr>
+    <th colspan="3" align="center">Buscador</th>
+  </tr>
+  <tr>
+    <td align="right">Buscar por</td>
+    <td align="left"><input type="text" name="codigo" id="codigo"  value="{$codigo}"/></td>
+    <td align="left"><input type="submit" name="button" id="button" value="Buscar" /></td>
+  </tr>  
+</table>
+</form>
+
+
+<br />
+<table class="formulario" align='center'  border="0" cellspacing="0" cellpadding="5"  >
+  <tr>
+    <td colspan="4" align="left"> 
+    <table align='left' width="100%"  border="0" cellspacing="0"  >
+    <tr>
+    <td>
+   {if $parent neq ""   } Categoria:<b> {$categoriaItem.name} </b>{/if}
+    </td>
+     <td align="right">
+       <a href="{$module}" title="Volver">
+    <img src="template/images/icons/home.png"  border="0"/>Inicio</a><a href="javascript:ventana({$categoriaItem.categoryId});" >  <img src="template/images/icons/page_add.png"  border="0"/>Nuevo Item</a>
+    {*
+    <a href="#" onclick="imprimirHoja('{$module}&action=print&rubro={$rubroId}&family={$family}&codigo={$codigo}')" title="Imprimir">
+    <img src="template/images/icons/printer.png"  border="0"/>Imprimir</a>
+    <a href="#" onclick="imprimirHoja('{$module}&action=print&rubro={$rubroId}&family={$family}&codigo={$codigo}&s=1')" title="Imprimir Stikers">
+    <img src="template/images/icons/printer.png"  border="0"/>Imprimir Stickers</a>*}
+    </td>
+    </tr>
+    </table>
+    
+  </td>
+
+
+  </tr>
+  <tr>
+    <th>N&deg;</th>
+    <th>Codigo</th>
+    <th>Descripcion</th>
+    <th>Unidad </th>
+  </tr>
+   {assign var="fila" value=""}
+  {section name=i loop=$item}
+   {if $smarty.section.i.index % 2 eq 0}
+        {assign var="fila" value="lista2"}
+    {else}
+        {assign var="fila" value="lista1"}
+    {/if}
+  <tr class="{$fila}" id="{$item[i].productId}"  onMouseOver="this.className='lista3'; return true;" onMouseOut="this.className='{$fila}'; return true;">
+    <td align="left">{$smarty.section.i.index_next}</td>
+    <td align="left">{$item[i].codebar} </td>
+    <td align="left"> <a href="index.php?module=product&action=view&id={$item[i].productId}&type=2" title="Editar">{$item[i].categoria}, {$item[i].name} {$item[i].color}</a>
+    						
+    			           
+                            
+                            
+    </td>
+    <td align="center">{$item[i].unidad}</td>
+  </tr>
+  {/section}
+</table>

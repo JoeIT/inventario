@@ -1,0 +1,65 @@
+ {literal}
+<script>
+function cancelar()
+{
+	jConfirm('No se registran ningun dato \n Esta seguro de cancelar?', 'Confirmacion', function(r) {
+   		if (r)
+ 	 		 location = "index.php?module=orden&action=orden&id={/literal}{$id}{literal}"
+		});
+}
+function precio(campo)
+{
+	var actual = eval(document.getElementById("stock"+campo).value);
+	var cantidad = eval(document.getElementById("cantidad"+campo).value);
+	var precio  = eval(document.getElementById("monto"+campo).value);
+	if (cantidad>actual)
+	{
+		jAlert('No puede ser mayor al stock Disponible', 'Alerta', function() {
+			document.getElementById("cantidad"+campo).value = 0;
+			document.getElementById("cantidad"+campo).focus();	
+		});
+	}
+	else
+		document.getElementById("total"+campo).value = eval(cantidad * precio);
+}
+</script>
+{/literal}
+<h2>Orden de Compra</h2>
+{include file="module/almacen/orden/headerOrden.tpl"}
+<br />
+<form action="{$module}" method="post">
+<input type="hidden" name="action" value="updateList" />
+<input type="hidden" name="id" value="{$id}" />
+Lista de Articulos
+<table summary="Lista de productos"  class="sofT" align='center'  border="1" cellspacing="0" cellpadding="5"  >
+  <tr>
+    <td class="helpHed">Articulo</td>
+    <td class="helpHed">Descripcion</td>
+    <td class="helpHed">Disponible</td>
+    <td class="helpHed">Cantidad</td>
+    <td class="helpHed">Costo</td>
+    <td class="helpHed" widtd="50" align="center">Importe</td>
+  </tr>
+  {section name=i loop=$item}
+  <tr>
+    <td align="left">{$item[i].productId}
+    <input type="hidden" name="codigo[]" id="textfield2" style="width:50px" value="{$item[i].itemId}"/>
+    </td>
+    <td align="left">{$item[i].description}</td>
+    <td align="left">{$item[i].stock} 
+    <input type="hidden" name="stock{$item[i].itemId}" id="stock{$item[i].itemId}"  value="{$item[i].stock}"/></td>
+    <td align="left">
+    <input type="text" name="cantidad[{$item[i].itemId}]" id="cantidad{$item[i].itemId}" class="cifra" value="{$item[i].amount}"  
+    onchange="precio({$item[i].itemId})" />
+    </td>
+    <td align="right">
+    <input type="text" name="monto[{$item[i].itemId}]" id="monto{$item[i].itemId}" class="cifra" value="{$item[i].price}" onchange="precio({$item[i].itemId})" /></td>
+    <td>
+    <input type="text" name="total[{$item[i].itemId}]" id="total{$item[i].itemId}" class="cifra" value="{$item[i].total}" readonly="readonly"/></td>
+  </tr>
+  {/section}
+</table>
+
+<input name="enviar" type="submit"  value="Guardar"/>  
+<input type="button" name="button2222" id="button2222" onclick="cancelar()" value="Cancelar" />
+</form>

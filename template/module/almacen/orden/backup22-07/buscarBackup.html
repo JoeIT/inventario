@@ -1,0 +1,216 @@
+<h2>Orden de compra</h2>
+{literal}
+<script>
+function cancel()
+{
+	jConfirm('No se registran ningun dato \n Esta seguro de cancelar?', 'Confirmacion', function(r) {
+   		if (r)
+ 	 		 location = "index.php?module=orden&action=orden&id={/literal}{$id}{literal}"
+		});
+}
+function precio(campo)
+{
+	var actual = eval(document.getElementById("stock"+campo).value);
+	var cantidad = eval(document.getElementById("cantidad"+campo).value);
+
+	var precio  = eval(document.getElementById("monto"+campo).value);
+//	alert("precio ->"+precio);
+	if (isNaN(precio))
+	{
+			document.getElementById("monto"+campo).value = 0;
+			precio = 0;
+	}
+//	 document.f1.elements[i].checked=1 
+	 document.getElementById("product"+campo).checked=1;
+	if (cantidad>actual)
+	{
+		jAlert('No puede ser mayor al stock Disponible', 'Alerta', function() {
+			document.getElementById("cantidad"+campo).value = 0;
+			document.getElementById("cantidad"+campo).focus();	
+		});
+	}
+	else
+		document.getElementById("total"+campo).value = eval(cantidad * precio);
+}
+</script>
+{/literal}
+<table widtd="100%" border="1" class="sofT" align="center"  cellpadding="5">
+  <tr>
+    <th colspan="4" scope="row">Detalle Orden de Compra</th>
+  </tr>
+  <tr>
+    <td scope="row">Numero Orden de Compra</td>
+    <td>{$orden.ordenId}</td>
+    <td>Referencia</td>
+    <td>{$orden.referencia}</td>
+  </tr>
+  <tr>
+    <td scope="row">Responsable</td>
+    <td>{$orden.elaborate}</td>
+    <td>Fecha pedido</td>
+    <td>{$orden.dateOrder}</td>
+  </tr>
+  <tr>
+    <td scope="row">Proveedor</td>
+    <td>{$orden.proveedor}</td>
+    <td>Fecha entrega</td>
+    <td>{$orden.dateProgram}</td>
+  </tr>
+  <tr>
+    <td scope="row">Almacen</td>
+    <td>{$orden.almacen}</td>
+    <td>Plazo</td>
+    <td>{$orden.plazo} Dias</td>
+  </tr>
+  <tr>
+    <td scope="row">Estado</td>
+    <td colspan="3"><b> {if $orden.state eq 0}Abierto{/if}
+      {if $orden.state eq 1}Enviado <a href="{$module}&amp;action=dispatch&amp;id={$orden.ordenId}&amp;pin=432534657832465" class="submodal-400-300">Registrar despacho</a>{/if}
+      {if $orden.state eq 2}Despachado{/if}
+      {if $orden.state eq 3}Transito{/if}
+      {if $orden.state eq 4}Recepcionado{/if}</b></td>
+  </tr>
+</table>
+<p>&nbsp; </p>
+<form action="index.php?module=orden" method="post">
+  <input type="hidden" value="{$id}" name="id" />
+<input type="hidden" value="listItem" name="action" />
+<table  class="formulario" align='center'  border="1" cellspacing="0" cellpadding="5">
+<tr>
+  <th colspan="3" align="center">Buscar Articulo</th>
+  </tr>
+<tr>
+  <td align="right">Rubro
+    <select name="rubro" id="rubro">
+      <option value="" style="background-color:#CCC">Todos los Rubro</option>
+      {section name=i loop=$rubro}
+      <option value="{$rubro[i].rubro}" {if $rubroId eq $rubro[i].rubro} selected="selected"{/if}>{$rubro[i].rubro}</option>
+		{/section}
+		 </select>
+  </td>
+	<td align="left">Familia<select name="family" id="family">
+	<option value="">Todas las Familias</option>    
+     {section name=i loop=$familia}
+      <option value="{$familia[i].family}" {if $family eq $familia[i].family} selected="selected"{/if}>{$familia[i].family}</option>
+		{/section}
+	    </select>
+	</td>
+	<td align="left">Codigo: <input type="text" name="codigo" id="codigo"  value="{$codigo}"/></td>
+	</tr>
+<tr>
+  <td colspan="3" align="center">
+    <input type="submit" name="button" id="button" value="Buscar" />
+    </td>
+</tr>
+</table>
+</form>
+<br />
+<form action="index.php?module=orden&action=addList" method="post" id="formItem">
+<input type="hidden" value="{$id}" name="id" />
+<font color="#FF0000">Datos actualizados proveedor hasta: <span style="font-size:17px;"><b>{$dateUpdate.dateUpdate}</b></span></font>
+[<a href="index.php?module=proveedor&action=upload&id={$orden.proveedorId}" class="submodal">Actualizar</a>]
+<table summary="Lista de productos"  class="sofT" align='center'  border="1" cellspacing="0" cellpadding="5"  >
+   <tr>
+     <td class="helpHed">&nbsp;</td>
+    <td class="helpHed">Articulo</td>
+    <td class="helpHed">Familia</td>
+    <td class="helpHed">Rubro</td>
+    <td class="helpHed">Descripcion</td>
+    <td class="helpHed">Disponible</td>
+    <td class="helpHed">Cantidad</td>
+    <td class="helpHed">Costo</td>
+    <td class="helpHed" widtd="50" align="center">Importe</td>
+  </tr>
+  {section name=i loop=$item}
+  <tr>
+    <td align="left"><label>
+      <input type="checkbox" name="item[]" id="product{$smarty.section.i.index}"  value="{$item[i].productId}"/>
+    </label></td>
+    <td align="left">{$item[i].productId}</td>
+    <td align="left">{$item[i].family}</td>
+    <td align="left">{$item[i].rubro}</td>
+    <td align="left">{$item[i].description}</td>
+    <td align="right">{$item[i].stock}
+    <input type="hidden" name="stock{$item[i].itemId}" id="stock{$smarty.section.i.index}" style="width:50px" value="{$item[i].stock}"/>
+    </td>
+    <td align="left">
+      <input type="text" name="cantidad[{$item[i].productId}]" id="cantidad{$smarty.section.i.index}" class="cifra"  value=""  
+    onchange="precio({$smarty.section.i.index})" />
+   </td>
+    <td align="right">  <input type="text" name="monto[{$item[i].productId}]" id="monto{$smarty.section.i.index}" class="cifra" value="{$item[i].price}" onchange="precio({$smarty.section.i.index})" /></td>
+    <td>   <input type="text" name="total[{$item[i].productId}]" id="total{$smarty.section.i.index}" class="cifra" value="{$item[i].total}" readonly="readonly"/></td>
+  </tr>
+	{sectionelse}
+    	<tr><td colspan="9">Por favor seleccionar familia, rubro o introducir el codigo del articulo en el buscador de articulos.</td>
+        </tr>
+  {/section}
+</table>
+{if $item[0].productId neq ""}
+
+<table summary="Lista de productos"  class="sofT" align='center'  border="1" cellspacing="0" cellpadding="5"  >
+  <tr>
+    <td  align="center"><input type="submit" name="button2" id="button2" value="Adicionar" />
+    <input type="button" name="button2222" id="button2222" onclick="cancel()" value="Cancelar" /></td>
+    </tr>
+</table>
+{/if}
+</form>
+{literal}
+<script>
+
+var options = {  
+	beforeSubmit:showRequest,
+	iframe:true,
+	success:showResponse
+}; 
+$('#formItem').ajaxForm(options);
+/*function cancel()
+{
+	jConfirm('No se enviaran los datos, esta seguro de cancelar?', 'Confirmacion', function(r) {
+   if (r)
+	   window.top.hidePopWin()
+	
+});
+	
+}*/
+function showRequest(formData, jqForm, op) { 
+	
+	if (confirm("Esta seguro de registrar los datos?")) 
+	{
+		return true;
+	}
+	
+    return false; 
+}
+function showResponse(responseText, statusText)  { 
+	if (responseText == 0)
+		jAlert('Error', 'Error',function() {
+		$("#name").focus();	
+					});
+	else
+	{
+		/*jAlert('Datos Enviados a {/literal} <b>{$item.destino}{literal}</b>', 'Ok',function() {
+		if (confirm("Desea agregar mas articulos a esta orden?")) 
+		{
+			location = "index.php?module=orden&action=listItem&id={/literal}{$id}{literal}"
+		}
+		else
+			location = "index.php?module=orden&action=orden&id={/literal}{$id}{literal}"
+	 	
+		});
+		*/
+		jConfirm('Datos registrados \n Desea agregar mas articulos', 'Confirmacion', function(r) {
+   		if (r)
+	  	 location = "index.php?module=orden&action=listItem&id={/literal}{$id}{literal}"
+		 else
+		 location = "index.php?module=orden&action=orden&id={/literal}{$id}{literal}"
+	
+		});
+		
+		
+	}
+} 
+
+
+</script>
+{/literal}

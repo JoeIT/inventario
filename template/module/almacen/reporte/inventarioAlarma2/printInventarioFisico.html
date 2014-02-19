@@ -1,0 +1,26 @@
+
+
+
+<table style="border: 1px #000 solid; border-collapse:collapse; font-family:Arial; font-size:10px;" align='center'  width="100%" border="1" cellspacing="0" cellpadding="5"  >
+  <tr>
+    <th >No.</th>
+    <th >Codigo</th>
+    <th >Cantidad</th>
+    <th >Unidad de Medida</th>
+    <th >Descripcion</th>
+  </tr>
+  {section name=i loop=$item}
+  <tr>
+    <td align="left">{$smarty.section.i.index_next}</td>
+    <td align="left" nowrap="nowrap">{$item[i].codebar}   </td>
+    <td align="right">{$item[i].cantidadSaldo}</td>
+    <td align="center">{$item[i].unidad}</td>
+    <td align="left">{$item[i].categoria}, {$item[i].name} {$item[i].color} </td>
+  </tr>
+  {sectionelse}
+  <tr>
+    <td colspan="5" align="left">No se tiene registros</td>
+  </tr>  
+  {/section}
+</table>
+

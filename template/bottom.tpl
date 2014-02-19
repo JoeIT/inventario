@@ -1,0 +1,1 @@
+<center>&copy; 2010 Macaws</center>

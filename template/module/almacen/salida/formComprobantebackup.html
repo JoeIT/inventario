@@ -1,0 +1,303 @@
+<link type="text/css" rel="stylesheet" href="template/js/jscal/css/jscal2.css" /> 
+<link id="skin-win2k" title="Win 2K" type="text/css" rel="alternate stylesheet" href="template/js/jscal/css/win2k/win2k.css" />
+<link rel="stylesheet" type="text/css" href="template/js/jscal/css/border-radius.css" /> 
+
+<script src="template/js/jscal/js/jscal2.js"></script>
+<script src="template/js/jscal/js/lang/es.js"></script>
+{literal}
+<script>
+function tipoTransferencia(tipo)
+{
+	if (tipo == "T")
+	{
+		document.getElementById("panelTraspaso").style.display = "";
+		document.getElementById("panelProduccion").style.display = "none";
+	}
+	else if (tipo == "P")
+	{
+		document.getElementById("panelTraspaso").style.display = "none";
+		document.getElementById("panelProduccion").style.display = "";
+	}
+	
+}
+</script>
+
+
+
+<script type="text/javascript">
+	function lookup(inputString) {
+		if(inputString.length == 0) {
+			// Hide the suggestion box.
+			$('#suggestions').hide();
+		} else {
+			$.post("index.php", {module:"salida",action:"search",queryString: ""+inputString+""}, function(data){
+				if(data.length >0) {
+					$('#suggestions').show();
+					$('#autoSuggestionsList').html(data);
+				}
+			});
+		}
+	} // lookup
+	
+	function fill(thisValue,descripcion,cantidad,costo,unidad) {
+		$('#inputString').val(thisValue);
+		$('#nombre').html(descripcion);
+		$('#stock').val(cantidad);
+		$('#disponible').html(cantidad);
+		$('#unidad').html(unidad);
+		$('#precio').val(costo);
+		if ($("#cantidad").val()!=0 && $("#cantidad").val()!="")
+		{
+			calcular();
+		}
+		setTimeout("$('#suggestions').hide();", 200);
+	}
+function calcular()
+{
+	var actual = eval($("#stock").val());
+	var cantidad = eval($("#cantidad").val());
+	var precio  = eval($("#precio").val());	
+	if (isNaN(precio))
+	{
+			$("#precio").val(0);
+			precio = 0;
+	}
+	if (cantidad>actual)
+	{
+		jAlert('No puede ser mayor al stock Disponible', 'Alerta', function() {
+			$("#cantidad").val(0);
+			$("#importe").val(0);
+			$("#cantidad").focus();		
+		});
+	}
+	else
+	{
+		importe = parseFloat(cantidad * precio);
+		$('#importe').val((importe).toFixed(2));
+	}
+}
+</script>
+
+<style type="text/css">
+
+
+	.suggestionsBox {
+		position:relative;
+		left: 10px;
+		margin: 10px 0px 0px 0px;
+		width: 200px;
+		background-color: #212427;
+		-moz-border-radius: 7px;
+		-webkit-border-radius: 7px;
+		border: 2px solid #000;	
+		color: #fff;
+		font-size:10px;
+	
+	}
+	
+	.suggestionList {
+		margin: 0px;
+		padding: 0px;
+	}
+	
+	.suggestionList li {
+		
+		margin: 0px 0px 3px 0px;
+		padding: 3px;
+		cursor: pointer;
+	}
+	
+	.suggestionList li:hover {
+		background-color: #659CD8;
+	}
+</style>
+{/literal}
+
+<form action="{$module}" method="post" id="formItem">
+<input type="hidden" name="action" value="add">
+<input name="item[encargado]" type="hidden" id="textfield4" value="{$userName}">
+<table border="1" class="formulario"  width="90%" >
+  <tr>
+    <th colspan="4">Comprobante Salida</th>
+  </tr>
+  <tr>
+    <td nowrap="nowrap">Numero Comprobante
+    <input name="item[comprobante]" type="hidden" id="comprobante" value="{$comprobante}"  class="numero" readonly="readonly" /></td>
+    <td width="26%"><b>{$comprobante}</b></td>
+    <td width="7%">Fecha</td>
+    <td width="41%" nowrap="nowrap">  <input name="item[dateReception]" type="text" style="width:100px" id="reception" value="{$smarty.now|date_format:'%Y-%m-%d'}" readonly="readonly">
+    </label>
+      <img src="template/images/icons/cal.gif" id="buttonDate" style="cursor: pointer; border: 1px solid #6593cf;" title="Click para seleccionar la fecha"    onmouseover="this.style.background='red';" onmouseout="this.style.background=''" border="0" /> 
+
+            {literal}
+      <script type="text/javascript">
+                  new Calendar({
+                          inputField: "reception",
+                          dateFormat: "%Y-%m-%d",
+                          trigger: "buttonDate",
+                          bottomBar: false,
+                          onSelect: function() {
+                                  var date = Calendar.intToDate(this.selection.get());
+                                
+                                  this.hide();
+                          }
+                  });
+                 function clearRangeStart() {
+                          document.getElementById("inicio").value = "";
+                       
+                  };
+                </script>
+      {/literal} </td>
+  </tr>
+  <tr>
+    <td>Tipo Salida</td>
+    <td>
+      
+      <input type="hidden" name="item[tipoTrans]" value="S" />
+      <select name="item[tipoComprobante]" id="tipoComprobante" style="width:150px" onchange="tipoTransferencia(this.value)">
+        <option value="P">A produccion</option>
+        <option value="T">Traspaso</option>
+      </select></td>
+    <td colspan="2" nowrap="nowrap"><div id="panelProduccion">Orden
+        <select name="salida[produccionId]" id="select" style="width:150px">      
+       {section name=i loop=$orden}       
+      <option value="{$orden[i].produccionId}">{$orden[i].referencia}</option>      
+      {/section}           
+    </select></div>
+    
+    <div id="panelTraspaso" style="display:none">Destino
+    <select name="salida[destinoId]" id="salida[destinoId]" style="width:150px">
+        
+       {section name=i loop=$almacenes}       
+      
+  <option value="{$almacenes[i].almacenId}">{$almacenes[i].name}</option>
+        
+      {/section}           
+    
+</select>
+    </div>
+    </td>
+    </tr>
+  <tr>
+    <td width="26%">Referencia:</td>
+    <td colspan="3"><input name="item[referencia]" type="text" id="referencia"  style="width:98%"/></td>
+  </tr>
+</table>
+
+	
+<table id="lista" class="sofT"   border="1" cellspacing="0" cellpadding="5"  >
+
+  
+  <tr>
+    <td class="helpHed">Codigo</td>
+    <td class="helpHed">Descripcion</td>
+    <td class="helpHed">Unidad de medida</td>
+    <td class="helpHed">Disponible</td>
+    <td class="helpHed">Cantidad</td>
+    <td class="helpHed">Precio Unitario</td>
+    <td class="helpHed" widtd="50" align="center">Importe</td>
+    <td class="helpHed" widtd="50" align="center">Accion</td>
+  </tr>
+
+  <tr id="fila{$item[i].ingresoId}">
+    <td align="left"><input type="text" size="20" value="" id="inputString" onkeyup="lookup(this.value);" onblur="fill();"   style="font-size:10px"/>
+    
+   
+    </td>
+    <td align="left">
+    <div id="nombre">&nbsp;</div>
+    </td>
+    <td align="center"><div id="unidad">&nbsp;</div></td>
+    <td align="right"><input type="hidden"  value="" id="stock"  class="numero"  style="font-size:10px"/>
+    	<div id="disponible">&nbsp;</div>
+    </td>
+    <td align="right"><input type="text"  value="" id="cantidad" class="numero"  style="font-size:10px" onchange="calcular()"/></td>
+    <td align="right"><input type="text" value="" id="precio" class="numero"  style="font-size:10px"/></td>
+    <td align="right"><input type="text"  value="" id="importe" class="numero"  style="font-size:10px" /></td>
+    <td align="right"> 
+   
+    <a href="#"  onclick="alert('{$module}&action=editIng&id={$item[i].ingresoId}')"title="Editar" >
+    <img src="template/images/icons/page_edit.png"  border="0"/></a>
+    <!--a href="#" onclick="alert('{$module}&action=delIng&id={$item[i].ingresoId}')" title="Quitar">
+    <img src="template/images/icons/sign_cacel.png"  border="0"/></a-->
+    <a href="#" onclick="deleteItem({$item[i].ingresoId})" title="Quitar"><img src="template/images/icons/sign_cacel.png"  border="0"/></a>   
+     </td>
+  </tr>
+  
+  {if $total.total neq ""}
+  <tr>
+      
+          <td colspan="2" align="right"><strong>Total</strong></td>
+          <td align="right">&nbsp;</td>
+          <td align="right">&nbsp;</td>
+          <td align="right"><strong>{$total.cantidad}</strong></td>
+          <td align="right">&nbsp;</td>
+          <td align="right"><strong>{$total.total|number_format:2:'.':''}</strong></td>
+          <td>&nbsp;</td>
+  </tr>
+  {/if}
+</table>
+
+ <div class="suggestionsBox" id="suggestions" style="display: none;">
+				<img src="upArrow.png" style="position: relative; top: -12px; left: 30px;" alt="upArrow" />
+				<div class="suggestionList" id="autoSuggestionsList">
+					&nbsp;
+				</div>
+			</div>
+        <input type="submit" name="button" id="button" value="Guardar" />
+      <input type="button" name="cancel" id="buttonCancelar" value="Cancelar"  onclick="cancelar()"/>
+</form>
+{literal}
+<script>
+
+
+var options = {  
+	beforeSubmit:showRequest,
+	iframe:true,
+	success:showResponse
+}; 
+$('#formItem').ajaxForm(options);
+
+function showRequest(formData, jqForm, op) { 
+
+	if (!confirm("Esta seguro de registrar los datos?")) 
+	{
+		return false;
+	}
+	if ($("#referencia").attr("value")=="")
+	{
+		jAlert('Ingrese Referencia del comprobante', 'Alerta',function() {
+		$("#referencia").focus();	
+			});
+		return false;
+	}
+	if ($("#reception").attr("value")=="")
+	{
+		jAlert('Ingrese fecha de recepcion', 'Alerta',function() {
+		$("#reception").focus();	
+			});
+		return false;
+	}else if ($("#cantidad").attr("value")=="" || $("#cantidad").attr("value")==0  )
+	{
+		jAlert('Ingrese la cantidad', 'Alerta',function() {
+		$("#cantidad").focus();	
+			});
+		return false;
+	}
+	else
+	    return true; 
+}
+function showResponse(responseText, statusText)  { 
+	if (responseText == 0)
+		jAlert('Se produjo un error', 'Error');
+	else
+	{
+		jAlert('Datos correctamente registrados', 'Ok',function() {
+		//parent.location.reload();	
+		parent.location = "index.php?module=salida&action=recibo&id="+responseText;
+					});
+	 	
+	}
+}
+</script>
+{/literal}

@@ -1,0 +1,111 @@
+<link type="text/css" rel="stylesheet" href="template/js/jscal/css/jscal2.css" /> 
+<link id="skin-win2k" title="Win 2K" type="text/css" rel="alternate stylesheet" href="template/js/jscal/css/win2k/win2k.css" />
+<link rel="stylesheet" type="text/css" href="template/js/jscal/css/border-radius.css" /> 
+
+<script src="template/js/jscal/js/jscal2.js"></script>
+<script src="template/js/jscal/js/lang/es.js"></script>
+<h2>Formulario Comprobante de Venta</h2>
+<form action="{$module}" method="post" id="formItem">
+<input type="hidden" name="action" value="add">
+<input name="item[encargado]" type="hidden" id="textfield4" value="{$userName}">
+<table border="1" class="formulario"  width="100%">
+  <tr>
+    <th colspan="4">Venta</th>
+  </tr>
+  <tr>
+    <td align="right">Comprobante</td>
+    <td width="40%"><input name="item[comprobante]" type="text" id="comprobante" value="{$comprobante}"  class="numero" readonly="readonly" /></td>
+    <td width="18%" align="right">Fecha</td>
+    <td width="30%"><label> 
+      <input name="item[dateReception]" type="text" style="width:100px" id="reception" value="{$smarty.now|date_format:'%Y-%m-%d'}" readonly="readonly">
+      </label>
+      <img src="template/images/icons/cal.gif" id="buttonDate" style="cursor: pointer; border: 1px solid #6593cf;" title="Click para seleccionar la fecha"    onmouseover="this.style.background='red';" onmouseout="this.style.background=''" border="0" /> 
+      
+      {literal}
+      <script type="text/javascript">
+                  new Calendar({
+                          inputField: "reception",
+                          dateFormat: "%Y-%m-%d",
+                          trigger: "buttonDate",
+                          bottomBar: false,
+                          onSelect: function() {
+                                  var date = Calendar.intToDate(this.selection.get());
+                                
+                                  this.hide();
+                          }
+                  });
+                 function clearRangeStart() {
+                          document.getElementById("inicio").value = "";
+                       
+                  };
+                </script>
+      {/literal} </td>
+  </tr>
+  <tr>
+    <td width="12%" align="right">Cliente</td>
+    <td colspan="3"><select name="venta[clientId]" id="client">
+
+     {section name=i loop=$client}
+      <option value="{$client[i].clientId}" {if $cliente eq $client[i].clientId} selected="selected"{/if}>
+      { if $client[i].nameEmpresa neq "" }{$client[i].nameEmpresa} - {/if}{$client[i].name} {$client[i].lastName}</option>
+		{/section}
+	    </select><a href="index.php?module=client&action=new" class="submodal-600-350"><img src="template/images/icons/page_add.png"  border="0"/>Adicionar</a></td>
+    </tr>
+  <tr>
+    <td align="right" nowrap="nowrap">Nombre Factura</td>
+  <td>   <input name="venta[nombreFactura]" type="text" id="textfield" value="" /></td>
+    <td align="right">Nit</td>
+    <td><input name="venta[nit]" type="text" id="textfield2" value="" /></td>
+  </tr>
+  <tr>
+    <td align="right">Observacion</td>
+    <td colspan="3"><input name="item[observation]" type="text" id="textfield5" value="{$recibo.observation}" style="width:98%"></td>
+  </tr>
+  <tr>
+    <td colspan="4" align="center"><input type="submit" name="button" id="button" value="Guardar" />
+      <input type="button" name="cancel" id="buttonCancelar" value="Cancelar"  onclick="cancelar()"/></td>
+  </tr>
+</table>
+</form>
+{literal}
+<script>
+
+
+var options = {  
+	beforeSubmit:showRequest,
+	iframe:true,
+	success:showResponse
+}; 
+$('#formItem').ajaxForm(options);
+
+function showRequest(formData, jqForm, op) { 
+
+	if (!confirm("Esta seguro de registrar los datos?")) 
+	{
+		return false;
+	}
+
+	if ($("#reception").attr("value")=="")
+	{
+		jAlert('Ingrese fecha de recepcion', 'Alerta',function() {
+		$("#reception").focus();	
+			});
+		return false;
+	}
+	else
+	    return true; 
+}
+function showResponse(responseText, statusText)  { 
+	if (responseText == 0)
+		jAlert('Se produjo un error', 'Error');
+	else
+	{
+		jAlert('Datos correctamente registrados', 'Ok',function() {
+		//parent.location.reload();	
+		parent.location = "index.php?module=venta&action=recibo&id="+responseText;
+					});
+	 	
+	}
+}
+</script>
+{/literal}
